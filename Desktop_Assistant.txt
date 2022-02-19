@@ -1,0 +1,108 @@
+from time import strftime
+import pyttsx3
+import datetime
+import wikipedia
+import webbrowser
+import speech_recognition as sr
+import os
+import smtplib
+import random
+#from wikipedia.wikipedia import random
+
+engine=pyttsx3.init('sapi5')
+my_voice=engine.getProperty('voices')
+engine.setProperty('voice',my_voice[1].id)
+
+
+def speak(text): 
+    engine.say(text)
+    engine.runAndWait()
+
+def wishme():
+    my_hour=(datetime.datetime.now().hour)
+    if(my_hour>=0 and my_hour<12):
+        speak("Good Morning")    
+    elif(my_hour>=12 and my_hour<18):
+        speak("Good Afternoon")
+    else:
+        speak("Good Evening")
+    
+    speak("I am your assistant Please tell me How may i help you")
+
+def takeCommand():
+    r=sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Listening...")
+        r.pause_threshold=1
+        r.energy_threshold=4000
+        r.adjust_for_ambient_noise(source)
+        audio=r.listen(source)
+
+    try:
+        print("Recognizing....")
+        query=r.recognize_google(audio,language='en-in')
+        print(f"User said: {query}\n")
+    except Exception as e:
+        print("Say that again!!!")
+        return "None"
+    return query
+
+directory={'ankit':'ankitthe1champ@gmail.com','amit':'amitthecoolhero@gmail.com','dady':'asingh.singh.632@gmail.com','demo':'2021pgcais02@nitjsr.ac.in'}
+
+def sendEmail(to,content):
+    s=smtplib.SMTP('smtp.gmail.com',587)
+    s.ehlo()
+    s.starttls()
+    s.login('xyz@gmail.com','Password')
+    s.sendmail('abc@gmail.com',to,content)
+    s.close()
+
+if __name__ == "__main__":
+    wishme()
+    #HERE WE HAVE TO WHILE(TRUE)
+    query=takeCommand().lower()
+    if 'wikipedia' in query:
+        speak('Seaching Wikipedia....')
+        query=query.replace("wikipedia", "")
+        results = wikipedia.summary(query, sentences=2)
+        speak("According to Wikipedia")
+        print(results)
+        speak(results)
+    elif 'open youtube' in query:
+        webbrowser.open('youtube.com')
+    elif 'open google' in query:
+        webbrowser.open('google.com')
+    elif 'nit jamshedpur' in query:
+        webbrowser.open('nitjsr.ac.in')
+    elif 'play music' in query:
+        music_dir='D:\\Music'
+        songs=os.listdir(music_dir)
+        print(songs)
+        randNumber=random.randint(0,len(songs-1))
+        os.startfile(os.path.join(music_dir,songs[randNumber]))
+    elif 'time' in query:
+        mytime=datetime.datetime.now().strftime("%H:%M:%S")
+        speak(f"The Time is {mytime}")
+    elif 'date' in query:
+        mydate=datetime.date.today()
+        speak(mydate)
+    elif 'open code' in query:
+        path_of_code="C:\\Users\\m computer\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"     
+        os.startfile(path_of_code)
+    elif 'send an email ' in query:
+        try:
+            speak("To whom you want to send an email")
+            value=takeCommand()
+            speak("What should i say")
+            content=takeCommand()
+            value=value.lower()
+            mera=directory[value]
+            to=mera
+            sendEmail(str(to),content)
+            speak("Email has benn sent")
+        except Exception as e:
+            print(e)
+            speak("Sorry my friend your email has not been sent")
+    elif 'exit' in query:
+        exit()
+
